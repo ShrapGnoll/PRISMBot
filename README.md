@@ -83,6 +83,12 @@ Note for programmers: adding a strings under this section will suppress Game and
 containing that substring.
 
 
+#### Running the Discord Bot/PRISMBot
+
+`python3.7 __main__.py` is sufficient to start the bot, you may want to use init scripts to bring it up and down
+
+`screen` or `tmux` may alternatively be used to keep a terminal session open
+
 
 
 
