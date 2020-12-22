@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="PRISMBot-ShrapGnoll",
-    version="0.1.0b1",
+    version="0.1.0rc1",
     author="ShrapGnoll",
     author_email="ShrapGnoll@gmail.com",
     description="A Discord bot for Project Reality's PRISM rcon management tool.",
@@ -19,4 +19,5 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.7',
+    install_requires=['discord.py'],
 )
