@@ -41,6 +41,8 @@ async def main():
 if __name__ == "__main__":
     try:
         ret = asyncio.run(main())
+        if ret is None:
+            exit(1)
         exit(int(ret))
     except:
         raise
