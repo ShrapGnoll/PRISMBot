@@ -38,6 +38,8 @@ the bot entry to your Discord server.
 
 Take note of the token generated in the "Bot" tab on the left side of your screen. You will need this for the next step.
 
+more info: https://discordpy.readthedocs.io/en/latest/discord.html
+
 #### PRISMBot Configuration.
 
 Add a PRISM user to your PRISM configuration, the bot will use this user. 
