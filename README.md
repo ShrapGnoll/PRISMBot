@@ -4,6 +4,18 @@ A bot to allow admins to read reports and run PRISM commands from your discord s
 
 ## How to use
 
+#### Python requirements
+
+This program needs python 3.7+
+
+One external python package is required.
+
+discord.py https://pypi.org/project/discord.py/
+
+You can be easily get it through pip.
+
+`python3 -m pip install -U discord.py`
+
 #### Setting up Discord
 
 This code allows you to run your own Discord bot. You need to make your own Discord Application rather than use an
