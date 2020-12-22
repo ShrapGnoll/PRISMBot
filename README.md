@@ -12,7 +12,7 @@ One external python package is required.
 
 discord.py https://pypi.org/project/discord.py/
 
-You can be easily get it through pip.
+You can easily get it through pip.
 
 `python3 -m pip install -U discord.py`
 
