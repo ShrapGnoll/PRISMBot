@@ -47,7 +47,7 @@ Add a PRISM user to your PRISM configuration, the bot will use this user.
 Download a copy of PRISMBot from github and extract it on the server you want
 to run it from, this doesn't have to be the same server PR is hosted on.
 
-<todo link>
+https://github.com/ShrapGnoll/PRISMBot/archive/master.zip
 
 Open config.ini in your favorite text editor.
 
