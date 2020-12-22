@@ -1,3 +1,6 @@
+# Copyright (c) 2020 ShrapGnoll ShrapGnoll@gmail.com
+# Subject to MIT license. See LICENSE.md for the full text.
+
 import sys
 import asyncio
 import logging

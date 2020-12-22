@@ -1,9 +1,11 @@
+# Copyright (c) 2020 ShrapGnoll ShrapGnoll@gmail.com
+# Subject to MIT license. See LICENSE.md for the full text.
+
 import asyncio
 import time
 import prismbot
 import discordbot
 import configparser
-
 
 async def main():
     config = configparser.ConfigParser()
