@@ -39,6 +39,9 @@ async def main():
     except SystemExit:
         dbot.logger.log("PRISMBot caught SystemExit.")
         return False
+    finally:
+        transport.close()
+        await dbot.close()
 
 if __name__ == "__main__":
     try:

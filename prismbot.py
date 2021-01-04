@@ -62,11 +62,13 @@ class PrismClientProtocol(asyncio.Protocol):
         self.debug = False # Toggle this to see detailed output
         self.logger = logger.Logger()
         self.periodic = [self.periodic_showafk]
+        self.showafk = 1200
         if config:
             self.host = config["PRISM"]["HOST"]
             self.port = config["PRISM"]["PORT"]
             self.username = config["PRISM"]["USERNAME"]
             self.password = config["PRISM"]["PASSWORD"]
+            self.showafk = int(config["PRISM"]["SHOWAFK"])
             self.config = config
 
     def recurse_messages(self, data):
@@ -143,9 +145,9 @@ class PrismClientProtocol(asyncio.Protocol):
         self.client_challenge = hex(csprng.getrandbits(128)).lstrip("0x").rstrip("L")
         self._raw_send_command("login1", "1", self.username, self.client_challenge)
 
-    async def periodic_showafk(self, sleepsec=1200):
+    async def periodic_showafk(self):
         while True:
-            await asyncio.sleep(sleepsec)
+            await asyncio.sleep(self.showafk)
             self._raw_send_command("say", "!showafk")
 
     """
