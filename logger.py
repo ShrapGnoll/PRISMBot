@@ -26,6 +26,6 @@ class Logger:
             self.log_buffer.append(msg)
         if msg[-1] != "\n":  # ensure last char is \n
             msg = msg + "\n"
-        sys.stderr.write(msg, flush=flush)
-
-
+        sys.stderr.write(msg)
+        if flush:
+            sys.stderr.flush()
