@@ -126,6 +126,9 @@ class PrismClientProtocol(asyncio.Protocol):
         self.output_buffer.append(data.encode())
         self._send_output_buffer()
 
+    def get_server_details(self):
+        self._raw_send_command("serverdetails")
+
     def set_logger(self, log_instance):
         self.logger = log_instance
 

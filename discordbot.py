@@ -57,6 +57,8 @@ class DiscordBot(discord.Client):
                 await message.channel.send("Connected: " + str(self.prism_bot.authenticated))
             if message.content[1:].lower() in ["connect", "login"]:
                 self.prism_bot.login(self.prism_bot.username, self.prism_bot.password)
+            if message.content[1:].lower() == "serverdetails":
+                self.prism_bot.get_server_details()
 
     async def log_to_command_channels(self, msg):
         for id in self.COMMAND_CHANNELS:
