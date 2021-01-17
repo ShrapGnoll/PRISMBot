@@ -16,7 +16,7 @@ class Logger:
         except IndexError:
             return
 
-    def log(self, msg, queue=False):
+    def log(self, msg, queue=False, flush=True):
         if not msg:
             return
         msg = str(msg)
@@ -26,6 +26,6 @@ class Logger:
             self.log_buffer.append(msg)
         if msg[-1] != "\n":  # ensure last char is \n
             msg = msg + "\n"
-        sys.stderr.write(msg)
+        sys.stderr.write(msg, flush=flush)
 
 
