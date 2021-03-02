@@ -41,7 +41,7 @@ class PrismClientProtocol(asyncio.Protocol):
                         "error": self._h_log,           "connected": self._h_connected,
                         "raconfig": self._h_donothing,  "chat": self._h_chat,
                         "kill": self._h_kill,           "success": self._h_success,
-                        "APIAdminResult": self._h_log_and_queue}
+                        "APIAdminResult": self._h_log_and_queue, "serverdetails": self._h_serverdetails}
         self.GAME_MANANGEMENT_CHAT = ["Game", "Admin Alert", "Response"]
         # net
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -127,7 +127,7 @@ class PrismClientProtocol(asyncio.Protocol):
         self._send_output_buffer()
 
     def get_server_details(self):
-        self._raw_send_command("serverdetails")
+        self._raw_send_command("serverdetailsalways")
 
     def set_logger(self, log_instance):
         self.logger = log_instance
@@ -220,4 +220,38 @@ class PrismClientProtocol(asyncio.Protocol):
 
     def _h_kill(self, data):
         pass
+
+    def _h_serverdetails(self, data):
+        """
+        parses serverdetails messages into a dict
+        """
+        try:
+            msg = data.split("\2")[1].split("\3")
+            details = {
+                "serverName": msg[0],
+                "serverIP": msg[1],
+                "serverPort": msg[2],
+                "serverStartupTime": msg[3],
+                "serverWarmup": msg[4],
+                "serverRoundLength": msg[5],
+                "maxPlayers": msg[6],
+                "status": msg[7],
+                "map": msg[8],
+                "mode": msg[9],
+                "layer": msg[10],
+                "timeStarted": msg[11],
+                "players": msg[12],
+                "team1": msg[13],
+                "team2": msg[14],
+                "tickets1": msg[15],
+                "tickets2": msg[16],
+                "rconUsers": msg[17]
+            }
+            details_str = ""
+            for pair in details.items():
+                details_str += str(pair[0]) + " : " + str(pair[1]) + "\n"
+            self.logger.log(details_str, queue=True)
+        except IndexError:
+            self.logger.log("Failed to parse serverdetails.", queue=True)
+
 
