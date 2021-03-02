@@ -67,16 +67,18 @@ class DiscordBot(discord.Client):
 
     @staticmethod
     def log_formatter(log):
+        strmap = {
+            "Game": """```css\n""" + log + """```""",
+            "Admin Alert": """```css\n[ """ + log + """]```""",
+            "Response": """```fix\n""" + log + """```""",
+            "serverName :": """```yaml\n""" + log + """```""",
+        }
         if not log:
             return log
-        elif log.startswith("Game"):
-            return """```css\n""" + log + """```"""
-        elif log.startswith("Admin Alert"):
-            return """```css\n[ """ + log + """]```"""
-        elif log.startswith("Response"):
-            return """```fix\n""" + log + """```"""
-        else:
-            return log
+        for prefix in strmap:
+            if log.startswith(prefix):
+                return strmap[prefix]
+        return log
 
     async def log_to_discord(self):
         while True:
