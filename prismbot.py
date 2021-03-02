@@ -260,6 +260,18 @@ class PrismClientProtocol(asyncio.Protocol):
             details["layer"] = layers[details["layer"]]
             details["timeStarted"] = datetime.datetime.fromtimestamp(float(details["timeStarted"])).strftime("%Y-%m-%d-T%H:%M:%S")
 
+            # hide some values between gameplay states because variables
+            # are populated from the old map and some from new
+            if int(details["status"]) != 0:
+                details["status"] = "LOADING SCREEN"
+                del details["mode"]
+                del details["layer"]
+                del details["team1"]
+                del details["team2"]
+            else:
+                # don't display status indicator mid round
+                del details["status"]
+
 
             details_str = ""
             for pair in details.items():
