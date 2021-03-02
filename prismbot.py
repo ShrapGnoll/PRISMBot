@@ -228,7 +228,7 @@ class PrismClientProtocol(asyncio.Protocol):
         try:
             msg = data.split("\2")[1].split("\3")
             details = {
-                #"serverName": msg[0],
+                "serverName": msg[0],
                 #"serverIP": msg[1],
                 #"serverPort": msg[2],
                 "serverStartupTime": msg[3],
