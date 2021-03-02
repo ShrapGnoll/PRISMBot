@@ -2,7 +2,7 @@
 # Subject to MIT license. See LICENSE.md for the full text.
 
 import os, sys, socket
-import random, hashlib, time
+import random, hashlib, time, datetime
 import asyncio
 import logger
 
@@ -228,13 +228,13 @@ class PrismClientProtocol(asyncio.Protocol):
         try:
             msg = data.split("\2")[1].split("\3")
             details = {
-                "serverName": msg[0],
-                "serverIP": msg[1],
-                "serverPort": msg[2],
+                #"serverName": msg[0],
+                #"serverIP": msg[1],
+                #"serverPort": msg[2],
                 "serverStartupTime": msg[3],
-                "serverWarmup": msg[4],
-                "serverRoundLength": msg[5],
-                "maxPlayers": msg[6],
+                #"serverWarmup": msg[4],
+                #"serverRoundLength": msg[5],
+                #"maxPlayers": msg[6],
                 "status": msg[7],
                 "map": msg[8],
                 "mode": msg[9],
@@ -247,6 +247,20 @@ class PrismClientProtocol(asyncio.Protocol):
                 "tickets2": msg[16],
                 "rconUsers": msg[17]
             }
+            layers = {
+                "16": "inf",
+                "32": "alt",
+                "64": "std",
+                "128": "lrg",
+            }
+            # replace some values with human readable equivalents
+            details["serverStartupTime"] = datetime.datetime.fromtimestamp(float(details["serverStartupTime"])).strftime("%Y-%m-%d-T%H:%M:%S")
+            #details["serverWarmup"] = str(float(details["serverWarmup"])/60) + " minutes"
+            #details["serverRoundLength"] = str(float(details["serverRoundLength"])/60) + " minutes"
+            details["layer"] = layers[details["layer"]]
+            details["timeStarted"] = datetime.datetime.fromtimestamp(float(details["timeStarted"])).strftime("%Y-%m-%d-T%H:%M:%S")
+
+
             details_str = ""
             for pair in details.items():
                 details_str += str(pair[0]) + " : " + str(pair[1]) + "\n"
