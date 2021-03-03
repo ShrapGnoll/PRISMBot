@@ -185,7 +185,10 @@ class PrismClientProtocol(asyncio.Protocol):
         elif message.messages[2] in self.GAME_MANANGEMENT_CHAT:
             del message.messages[:2]
             if message.messages[2] == "Admin Alert":
-                self._h_squelch(message, self.config["SQUELCH_ADMIN"])
+                if "m]" in message.messages[3] and self.TEAMKILL_CHANNEL:
+                    self._log(message, queue=True, channel_id=self.TEAMKILL_CHANNEL)
+                else:
+                    self._h_squelch(message, self.config["SQUELCH_ADMIN"])
             elif message.messages[2] == "Game":
                 self._h_squelch(message, self.config["SQUELCH_GAME"])
             else:
