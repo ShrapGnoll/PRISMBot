@@ -164,11 +164,11 @@ class PrismClientProtocol(asyncio.Protocol):
     def _h_login1(self, message):
         self.salt, self.server_challenge = message.messages
         if self.salt and self.server_challenge:
-            self._h_login2()
+            self._login2()
         else:
             self.logger.log("Failed login bad salt or server challenge.")
 
-    def _h_login2(self):
+    def _login2(self):
         self._raw_send_command("login2", self.auth_digest(
             self.username,
             self.password_hash,
@@ -199,27 +199,16 @@ class PrismClientProtocol(asyncio.Protocol):
             self._log(message)
 
     def _h_man_game(self, message):
-        if message.contains(self.config["SQUELCH_GAME"]):
+        if message.contains(self.config["SQUELCH_GAME"].values()):
             return
         self._log(message, queue=True)
 
     def _h_man_adminalert(self, message):
-        if message.contains(self.config["SQUELCH_ADMIN"]):
+        if message.contains(self.config["SQUELCH_ADMIN"].values()):
             return
         self._log(message, queue=True)
 
     def _h_man_response(self, message):
-        self._log(message, queue=True)
-
-
-
-    def _h_squelch(self, message, squelch_list):
-        """
-        Only log data if it does not contain any strings listed in squelch_list
-        """
-        for string in squelch_list:
-            if message.contains(string):
-                return
         self._log(message, queue=True)
 
     def _h_log_and_queue(self, message):
