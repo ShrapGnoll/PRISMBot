@@ -44,6 +44,8 @@ class PrismClientProtocol(asyncio.Protocol):
                         "APIAdminResult": self._h_log_and_queue, "serverdetails": self._h_serverdetails,
                         "updateserverdetails": self._h_donothing}
         self.GAME_MANANGEMENT_CHAT = ["Game", "Admin Alert", "Response"]
+        self.GAME_MANANGEMENT_PARSERS = {"Game": self._h_man_game, "Admin Alert": self._h_man_adminalert,
+                                         "Response": self._h_man_response}
         # net
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.host = ""
@@ -180,22 +182,34 @@ class PrismClientProtocol(asyncio.Protocol):
         self.authenticated = True
         self._log(message)
 
+    def isGameManagementChat(self, message):
+        if message.subject != "chat":
+            return False
+        if message.messages[2] in self.GAME_MANANGEMENT_PARSERS:
+            return True
+        return False
+
     def _h_chat(self, message):
-        if len(message.messages) <= 2:
-            self._log(message)
-        elif message.messages[2] in self.GAME_MANANGEMENT_CHAT:
+        if self.isGameManagementChat(message):
             del message.messages[:2]
-            if message.messages[0] == "Admin Alert":
-                if message.contains(" m]") and self.TEAMKILL_CHANNEL:
-                    self._log(message, queue=True, channel_id=self.TEAMKILL_CHANNEL)
-                else:
-                    self._h_squelch(message, self.config["SQUELCH_ADMIN"])
-            elif message.messages[0] == "Game":
-                self._h_squelch(message, self.config["SQUELCH_GAME"])
-            else:
-                self._log(message, queue=True)
+            self.GAME_MANANGEMNT_PARSERS[message.messages[0]](message)
         else:
             self._log(message)
+
+    def _h_man_game(self, message):
+        if message.contains(self.config["SQUELCH_GAME"]):
+            return
+        self._log(message, queue=True)
+
+    def _h_man_adminalert(self, message):
+        if message.contains(self.config["SQUELCH_ADMIN"]):
+            return
+        self._log(message, queue=True)
+
+    def _h_man_response(self, message):
+        self._log(message, queue=True)
+
+
 
     def _h_squelch(self, message, squelch_list):
         """
@@ -294,7 +308,9 @@ class Message:
         self.messages = data.split("\2")[1:][0].split("\3")
         self.messages[-1] = self.messages[-1].rstrip("\4\0")  # strip trailing delimiter
 
-    def contains(self, string):
-        if string in str(self.messages):
-            return True
+    def contains(self, list_of_strs):
+        for string in list_of_strs:
+            for message in self.messages:
+                if string in message:
+                    return True
         return False
