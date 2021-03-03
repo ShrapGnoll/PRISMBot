@@ -59,7 +59,7 @@ class PrismClientProtocol(asyncio.Protocol):
         # program state
         self.config = None
         self.authenticated = False
-      self.debug = False  # Toggle this to see detailed output
+        self.debug = False  # Toggle this to see detailed output
         self.logger = logger.Logger()
         self.periodic = [self.periodic_showafk]
         self.showafk = 1200
