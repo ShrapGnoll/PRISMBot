@@ -178,7 +178,7 @@ class PrismClientProtocol(asyncio.Protocol):
 
     def _h_connected(self, message):
         self.authenticated = True
-        self._log(message.data)
+        self._log(message)
 
     def _h_chat(self, message):
         if len(message.messages) < 2:
