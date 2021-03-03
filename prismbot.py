@@ -37,8 +37,8 @@ class PrismClientProtocol(asyncio.Protocol):
         # program loop for asyncio.Protocol
         self.loop = loop
         # this dict assigns subjects to parsers
-        self.PARSERS = {"login1": self._h_login1,       "errorcritical": self._h_log,
-                        "error": self._h_log,           "connected": self._h_connected,
+        self.PARSERS = {"login1": self._h_login1,       "errorcritical": self._log,
+                        "error": self._log,           "connected": self._h_connected,
                         "raconfig": self._h_donothing,  "chat": self._h_chat,
                         "kill": self._h_kill,           "success": self._h_success,
                         "APIAdminResult": self._h_log_and_queue, "serverdetails": self._h_serverdetails}
