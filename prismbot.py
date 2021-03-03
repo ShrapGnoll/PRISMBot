@@ -160,7 +160,7 @@ class PrismClientProtocol(asyncio.Protocol):
     """
 
     def _h_login1(self, message):
-        self.salt, self.server_challenge = message.data
+        self.salt, self.server_challenge = message.messages
         if self.salt and self.server_challenge:
             self._h_login2()
         else:
