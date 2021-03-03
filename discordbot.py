@@ -67,10 +67,10 @@ class DiscordBot(discord.Client):
         await channel.send(msg)
 
     @staticmethod
-    def log_formatter(log):
+    def log_formatter(log):  # TODO optimize
         strmap = {
             "Game": """```cs\n'""" + log + """'```""",
-            "Admin Alert": """```diff\n-""" + log + """``` """,
+            "Admin Alert": """```diff\n- """ + log + """``` """,
             "Response": """```fix\n""" + log + """```""",
             "serverName :": """```yaml\n""" + log + """```""",
             "Success": """```diff\n+ """ + log + """```"""
