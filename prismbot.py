@@ -250,7 +250,7 @@ class PrismClientProtocol(asyncio.Protocol):
                 "team2": msg[14],
                 "tickets1": msg[15],
                 "tickets2": msg[16],
-                "rconUsers": msg[17]
+                #"rconUsers": msg[17]
             }
             layers = {
                 "16": "inf",
