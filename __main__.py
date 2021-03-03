@@ -30,8 +30,6 @@ async def main():
         await asyncio.wait(wait_on, return_when=asyncio.FIRST_EXCEPTION)
     except prismbot.PrismClientProtocolConnectionLost:
         dbot.logger.log("PRISMBot lost connection.")
-        transport.close()
-        await dbot.close()
         return True
     except KeyboardInterrupt:
         dbot.logger.log("PRISMBot caught KeyboardInterrupt.")

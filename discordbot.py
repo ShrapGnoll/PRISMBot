@@ -84,7 +84,7 @@ class DiscordBot(discord.Client):
 
     async def log_to_discord(self):
         while True:
-            await asyncio.sleep(1)
+            await asyncio.sleep(0.5)
             while self.logger.log_buffer:
                 data = self.logger.consume_log()
                 if not data[0]:
