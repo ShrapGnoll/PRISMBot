@@ -185,6 +185,8 @@ class PrismClientProtocol(asyncio.Protocol):
     def isGameManagementChat(self, message):
         if message.subject != "chat":
             return False
+        if len(message) < 3:
+            return False
         if message.messages[2] in self.GAME_MANANGEMENT_PARSERS:
             return True
         return False
