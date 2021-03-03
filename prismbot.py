@@ -59,7 +59,7 @@ class PrismClientProtocol(asyncio.Protocol):
         # program state
         self.config = None
         self.authenticated = False
-        self.debug = False # Toggle this to see detailed output
+      self.debug = False  # Toggle this to see detailed output
         self.logger = logger.Logger()
         self.periodic = [self.periodic_showafk]
         self.showafk = 1200
@@ -93,11 +93,10 @@ class PrismClientProtocol(asyncio.Protocol):
             self.recurse_messages(msgs[1])  # recursively parse other messages
 
     def parse_command(self, command):
-        found = False
         message = Message(command)
         if message.subject in self.PARSERS:
             self.PARSERS[message.subject](message)
-        if self.debug and not found:  # log messages with no parser if debug is True
+        elif self.debug:  # log messages with no parser if debug is True
             self._log("No parser found: " + command)
 
     def set_input_buffer(self, data):
@@ -181,12 +180,15 @@ class PrismClientProtocol(asyncio.Protocol):
         self._log(message)
 
     def _h_chat(self, message):
-        if len(message.messages) < 2:
+        if len(message.messages) <= 2:
             self._log(message)
-        elif message.messages[0] in self.GAME_MANANGEMENT_CHAT:
-            if message.messages[0] == "Admin Alert":
+        elif message.messages[2] in self.GAME_MANANGEMENT_CHAT:
+            del message.messages[:2]
+            if message.messages[2] == "Admin Alert":
                 self._h_squelch(message, self.config["SQUELCH_ADMIN"])
-            elif message.messages[0] == "Game":
+            elif message.messages[2] == "Game":
+                self._h_squelch(message, self.config["SQUELCH_GAME"])
+            elif message.messages[2] == "Response":
                 self._h_squelch(message, self.config["SQUELCH_GAME"])
             else:
                 self._log(message, queue=True)
@@ -197,8 +199,8 @@ class PrismClientProtocol(asyncio.Protocol):
         """
         Only log data if it does not contain any strings listed in squelch_list
         """
-        for str in squelch_list:
-            if message.contains(str):
+        for string in squelch_list:
+            if message.contains(string):
                 return
         self._log(message, queue=True)
 
@@ -208,7 +210,10 @@ class PrismClientProtocol(asyncio.Protocol):
     def _log(self, message, queue=False, channel_id=None):
         if channel_id is None:
             channel_id = self.COMMAND_CHANNEL
-        self.logger.log(" ".join(message.messages), queue=queue, channel_id=channel_id)
+        if isinstance(message, Message):
+            self.logger.log(" ".join(message.messages), queue=queue, channel_id=channel_id)
+        else:
+            self.logger.log(message, queue=queue, channel_id=channel_id)
 
     def _h_success(self, message):
         self._log(message, queue=True)
@@ -282,10 +287,10 @@ class Message:
         self.data = data  # raw packet data
         self.subject = data.split("\2")[0].lstrip("\1")
         self.messages = data.split("\2")[1:][0].split("\3")
-        self.messages[-1].rstrip("\4\0")  # strip trailing delimiter
+        self.messages[-1] = self.messages[-1].rstrip("\4\0")  # strip trailing delimiter
 
-    def contains(self, str):
+    def contains(self, string):
         for message in self.messages:
-            if str in message:
+            if string in message:
                 return True
         return False

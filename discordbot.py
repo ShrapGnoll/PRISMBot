@@ -30,12 +30,12 @@ class DiscordBot(discord.Client):
 
 
     async def on_ready(self):
-        await self.log_to_command_channels("PRISMBot Online.")
+        await self.log_to_command_channel("PRISMBot Online.")
 
     async def on_message(self, message):
         if message.author == self.user:
             return
-        if message.channel.id not in self.COMMAND_CHANNELS:
+        if message.channel.id != int(self.COMMAND_CHANNEL):
             return
         if self.ADMINS and message.author.id not in self.ADMINS:
             await message.channel.send("You are not authorized to send commands over Discord.")
@@ -62,10 +62,9 @@ class DiscordBot(discord.Client):
             if message.content[1:].lower() == "serverdetails":
                 self.prism_bot.get_server_details()
 
-    async def log_to_command_channels(self, msg):
-        for id in self.COMMAND_CHANNELS:
-            channel = self.get_channel(id)
-            await channel.send(msg)
+    async def log_to_command_channel(self, msg):
+        channel = self.get_channel(self.COMMAND_CHANNEL)
+        await channel.send(msg)
 
     @staticmethod
     def log_formatter(log):
@@ -93,13 +92,13 @@ class DiscordBot(discord.Client):
                     channel = self.get_channel(data[1])
                     await channel.send(self.log_formatter(data[0]))
                 else:
-                    await self.log_to_command_channels(self.log_formatter(data[0]))
+                    await self.log_to_command_channel(self.log_formatter(data[0]))
 
     async def status_reconnect(self):
         while True:
             await asyncio.sleep(3600*8)  # check every 8 hours
             if not self.prism_bot.authenticated:
-                await self.log_to_command_channels("Lost PRISM Connection! <@" + str(self.OWNER_ID) + ">")
+                await self.log_to_command_channel("Lost PRISM Connection! <@" + str(self.OWNER_ID) + ">")
 
     async def status_daily(self):
         while True:
@@ -108,9 +107,9 @@ class DiscordBot(discord.Client):
 
     async def print_status(self):
         if self.prism_bot.authenticated:
-            await self.log_to_command_channels("Status: Authenticated.")
+            await self.log_to_command_channel("Status: Authenticated.")
         else:
-            await self.log_to_command_channels("Status: Disconnected!")
+            await self.log_to_command_channel("Status: Disconnected!")
 
     def add_admin(self, user_id):
         assert (isinstance(user_id, int) or isinstance(user_id, float))
