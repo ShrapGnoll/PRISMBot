@@ -41,7 +41,8 @@ class PrismClientProtocol(asyncio.Protocol):
                         "error": self._log,           "connected": self._h_connected,
                         "raconfig": self._h_donothing,  "chat": self._h_chat,
                         "kill": self._h_kill,           "success": self._h_success,
-                        "APIAdminResult": self._h_log_and_queue, "serverdetails": self._h_serverdetails}
+                       "APIAdminResult": self._h_log_and_queue, "serverdetails": self._h_serverdetails,
+                        "updateserverdetails": self._h_donothing}
         self.GAME_MANANGEMENT_CHAT = ["Game", "Admin Alert", "Response"]
         # net
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -184,12 +185,12 @@ class PrismClientProtocol(asyncio.Protocol):
             self._log(message)
         elif message.messages[2] in self.GAME_MANANGEMENT_CHAT:
             del message.messages[:2]
-            if message.messages[2] == "Admin Alert":
-                if "m]" in message.messages[3] and self.TEAMKILL_CHANNEL:
+            if message.messages[0] == "Admin Alert":
+                if "m]" in str(message.messages) and self.TEAMKILL_CHANNEL:
                     self._log(message, queue=True, channel_id=self.TEAMKILL_CHANNEL)
                 else:
                     self._h_squelch(message, self.config["SQUELCH_ADMIN"])
-            elif message.messages[2] == "Game":
+            elif message.messages[0] == "Game":
                 self._h_squelch(message, self.config["SQUELCH_GAME"])
             else:
                 self._log(message, queue=True)
@@ -284,6 +285,9 @@ class PrismClientProtocol(asyncio.Protocol):
 
 
 class Message:
+    """
+    PRISM packet data message container
+    """
     def __init__(self, data):
         self.data = data  # raw packet data
         self.subject = data.split("\2")[0].lstrip("\1")
@@ -291,7 +295,6 @@ class Message:
         self.messages[-1] = self.messages[-1].rstrip("\4\0")  # strip trailing delimiter
 
     def contains(self, string):
-        for message in self.messages:
-            if string in message:
-                return True
+        if string in str(self.messages):
+            return True
         return False
