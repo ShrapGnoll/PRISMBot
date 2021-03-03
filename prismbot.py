@@ -188,13 +188,6 @@ class PrismClientProtocol(asyncio.Protocol):
                 self._h_squelch(message, self.config["SQUELCH_ADMIN"])
             elif message.messages[2] == "Game":
                 self._h_squelch(message, self.config["SQUELCH_GAME"])
-            elif message.messages[2] == "Response":
-                for msg in message.messages:
-                    if "\n" in msg:  # remove extra epoch and num
-                        newline_index = message.messages.index(msg)
-                        del message.messages[newline_index + 1]
-                        del message.messages[newline_index + 2]
-                self._h_squelch(message, self.config["SQUELCH_GAME"])
             else:
                 self._log(message, queue=True)
         else:
