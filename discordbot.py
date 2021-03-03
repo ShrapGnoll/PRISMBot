@@ -70,7 +70,7 @@ class DiscordBot(discord.Client):
     def log_formatter(log):
         strmap = {
             "Game": """```css\n""" + log + """```""",
-            "Admin Alert": """```css\n[ """ + log + """]```""",
+            "Admin Alert": """```cs\n" """ + log + """ "``` """,
             "Response": """```fix\n""" + log + """```""",
             "serverName :": """```yaml\n""" + log + """```""",
             "Success": """```diff\n+ """ + log + """```"""
