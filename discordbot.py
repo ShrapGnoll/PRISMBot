@@ -73,6 +73,7 @@ class DiscordBot(discord.Client):
             "Admin Alert": """```css\n[ """ + log + """]```""",
             "Response": """```fix\n""" + log + """```""",
             "serverName :": """```yaml\n""" + log + """```""",
+            "Success": """```diff\n+ """ + log + """```"""
         }
         if not log:
             return log
