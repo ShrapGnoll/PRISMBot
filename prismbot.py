@@ -187,14 +187,14 @@ class PrismClientProtocol(asyncio.Protocol):
             return False
         if len(message) < 3:
             return False
-        if message.messages[2] in self.GAME_MANANGEMENT_PARSERS:
+        if message.messages[2] in self.GAME_MANAGEMENT_PARSERS:
             return True
         return False
 
     def _h_chat(self, message):
         if self.isGameManagementChat(message):
             del message.messages[:2]
-            self.GAME_MANANGEMNT_PARSERS[message.messages[0]](message)
+            self.GAME_MANAGEMENT_PARSERS[message.messages[0]](message)
         else:
             self._log(message)
 
