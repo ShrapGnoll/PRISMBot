@@ -63,12 +63,16 @@ class PrismClientProtocol(asyncio.Protocol):
         self.logger = logger.Logger()
         self.periodic = [self.periodic_showafk]
         self.showafk = 1200
+        self.COMMAND_CHANNEL = None
+        self.TEAMKILL_CHANNEL = None
         if config:
             self.host = config["PRISM"]["HOST"]
             self.port = config["PRISM"]["PORT"]
             self.username = config["PRISM"]["USERNAME"]
             self.password = config["PRISM"]["PASSWORD"]
             self.showafk = int(config["PRISM"]["SHOWAFK"])
+            self.COMMAND_CHANNEL = int(config["DISCORD_CHANNELS"]["COMMAND"])
+            self.TEAMKILL_CHANNEL = int(config["DISCORD_CHANNELS"]["TEAMKILL"])
             self.config = config
 
     def recurse_messages(self, data):
@@ -90,13 +94,11 @@ class PrismClientProtocol(asyncio.Protocol):
 
     def parse_command(self, command):
         found = False
-        for subj in self.PARSERS:
-            if subj in command[:1 + len(subj)]:
-                self.PARSERS[subj](command)
-                found = True
-                break
+        message = Message(command)
+        if message.subject in self.PARSERS:
+            self.PARSERS[message.subject](message)
         if self.debug and not found:  # log messages with no parser if debug is True
-            self._h_log("No parser found: " + command)
+            self._log("No parser found: " + command)
 
     def set_input_buffer(self, data):
         self.input_buffer = data
@@ -157,8 +159,8 @@ class PrismClientProtocol(asyncio.Protocol):
     ## Subject Handlers ##
     """
 
-    def _h_login1(self, data):
-        self.salt, self.server_challenge = data[len("\1login1\2"):].split("\3")
+    def _h_login1(self, message):
+        self.salt, self.server_challenge = message.data
         if self.salt and self.server_challenge:
             self._h_login2()
         else:
@@ -174,59 +176,55 @@ class PrismClientProtocol(asyncio.Protocol):
         self.password_hash = ""  # don't store this credential long
         self.client_challenge = ""  # clear client chal because its a nonce
 
-    def _h_connected(self, data):
+    def _h_connected(self, message):
         self.authenticated = True
-        self._h_log(data)
+        self._log(message.data)
 
-    def _h_chat(self, data):
-        spl = data.split("\3")
-        if len(spl) < 3:
-            self._h_log(data)
-        elif spl[2] in self.GAME_MANANGEMENT_CHAT:
-            if spl[2] == "Admin Alert":
-                self._h_squelch(data, self.config["SQUELCH_ADMIN"])
-            elif spl[2] == "Game":
-                self._h_squelch(data, self.config["SQUELCH_GAME"])
+    def _h_chat(self, message):
+        if len(message.messages) < 2:
+            self._log(message)
+        elif message.messages[0] in self.GAME_MANANGEMENT_CHAT:
+            if message.messages[0] == "Admin Alert":
+                self._h_squelch(message, self.config["SQUELCH_ADMIN"])
+            elif message.messages[0] == "Game":
+                self._h_squelch(message, self.config["SQUELCH_GAME"])
             else:
-                self._h_log(data, queue=True)
+                self._log(message, queue=True)
         else:
-            self._h_log(data)
+            self._log(message)
 
-    def _h_squelch(self, data, squelch_list):
+    def _h_squelch(self, message, squelch_list):
         """
         Only log data if it does not contain any strings listed in squelch_list
         """
-        for msg in squelch_list:
-            if squelch_list[msg] in data:
+        for str in squelch_list:
+            if message.contains(str):
                 return
-        self._h_log(data, queue=True)
+        self._log(message, queue=True)
 
-    def _h_log_and_queue(self, data):
-        self._h_log(data, queue=True)
+    def _h_log_and_queue(self, message):
+        self._log(message, queue=True)
 
-    def _h_log(self, data, queue=False):
-        try:
-            prefix_split = data.split("\2")
-            msg_split = prefix_split[1].split("\3")
-            self.logger.log(" ".join(msg_split[2:]), queue=queue)
-        except IndexError:
-            self.logger.log(data, queue=queue)
+    def _log(self, message, queue=False, channel_id=None):
+        if channel_id is None:
+            channel_id = self.COMMAND_CHANNEL
+        self.logger.log(" ".join(message.messages), queue=queue, channel_id=channel_id)
 
-    def _h_success(self, data):
-        self._h_log(data, queue=True)
+    def _h_success(self, message):
+        self._log(message, queue=True)
 
-    def _h_donothing(self, data):
+    def _h_donothing(self, message):
         pass
 
-    def _h_kill(self, data):
+    def _h_kill(self, message):
         pass
 
-    def _h_serverdetails(self, data):
+    def _h_serverdetails(self, message):
         """
         parses serverdetails messages into a dict
         """
         try:
-            msg = data.split("\2")[1].split("\3")
+            msg = message.messages
             details = {
                 "serverName": msg[0],
                 #"serverIP": msg[1],
@@ -271,8 +269,6 @@ class PrismClientProtocol(asyncio.Protocol):
             else:
                 # don't display status indicator mid round
                 del details["status"]
-
-
             details_str = ""
             for pair in details.items():
                 details_str += str(pair[0]) + " : " + str(pair[1]) + "\n"
@@ -281,3 +277,15 @@ class PrismClientProtocol(asyncio.Protocol):
             self.logger.log("Failed to parse serverdetails.", queue=True)
 
 
+class Message:
+    def __init__(self, data):
+        self.data = data  # raw packet data
+        self.subject = data.split("\2")[0].lstrip("\1")
+        self.messages = data.split("\2")[1:][0].split("\3")
+        self.messages[-1].rstrip("\4\0")  # strip trailing delimiter
+
+    def contains(self, str):
+        for message in self.messages:
+            if str in message:
+                return True
+        return False

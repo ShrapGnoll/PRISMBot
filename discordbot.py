@@ -12,7 +12,8 @@ import random
 class DiscordBot(discord.Client):
     def __init__(self, config=None):
         super().__init__()
-        self.COMMAND_CHANNELS = []  # channels the bot will accept commands in
+        self.COMMAND_CHANNEL = None  # channels the bot will accept commands in
+        self.TEAMKILL_CHANNEL = None  # channels the bot will print tks in
         self.OWNER_ID = None  # the owner of the bot, used for informational @mentions
         self.ADMINS = []  # if this list is populated only users listed can run commands
         self.prism_bot = None  # to be assigned to a PrismClientProtocol instance
@@ -20,12 +21,13 @@ class DiscordBot(discord.Client):
         self.config = None  # configparser ini gets read into here
         self.periodic = [self.log_to_discord, self.status_reconnect, self.status_daily]
         if config:
-            self.set_owner(int(config["DISCORD"]["OWNER_ID"]))
-            for channel in config["DISCORD_CHANNELS"]:
-                self.add_command_channel(int(config["DISCORD_CHANNELS"][channel]))
+            self.OWNER_ID = int(config["DISCORD"]["OWNER_ID"])
+            self.COMMAND_CHANNEL = int(config["DISCORD_CHANNELS"]["COMMAND"])
+            self.TEAMKILL_CHANNEL = int(config["DISCORD_CHANNELS"]["TEAMKILL"])
             for admin in config["DISCORD_ADMINS"]:
-                self.add_admin(int(admin))
+                self.add_admin(admin)
             self.config = config
+
 
     async def on_ready(self):
         await self.log_to_command_channels("PRISMBot Online.")
@@ -85,9 +87,13 @@ class DiscordBot(discord.Client):
             await asyncio.sleep(1)
             while self.logger.log_buffer:
                 data = self.logger.consume_log()
-                if not data:
+                if not data[0]:
                     return
-                await self.log_to_command_channels(self.log_formatter(data))
+                if data[1] is not None:
+                    channel = self.get_channel(data[1])
+                    await channel.send(self.log_formatter(data[0]))
+                else:
+                    await self.log_to_command_channels(self.log_formatter(data[0]))
 
     async def status_reconnect(self):
         while True:
@@ -106,17 +112,9 @@ class DiscordBot(discord.Client):
         else:
             await self.log_to_command_channels("Status: Disconnected!")
 
-    def set_owner(self, user_id):
-        assert (isinstance(user_id, int) or isinstance(user_id, float))
-        self.OWNER_ID = user_id
-
     def add_admin(self, user_id):
         assert (isinstance(user_id, int) or isinstance(user_id, float))
-        self.ADMINS.append(user_id)
-
-    def add_command_channel(self, channel_id):
-        assert (isinstance(channel_id, int) or isinstance(channel_id, float))
-        self.COMMAND_CHANNELS.append(channel_id)
+        self.ADMINS.append(int(user_id))
 
     def assign_bot(self, bot):
         assert isinstance(bot, prismbot.PrismClientProtocol)
