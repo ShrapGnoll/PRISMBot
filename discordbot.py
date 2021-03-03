@@ -69,7 +69,7 @@ class DiscordBot(discord.Client):
     @staticmethod
     def log_formatter(log):  # TODO optimize
         strmap = {
-            "Game": """```cs\n'""" + log + """'```""",
+            "Game": """```cs\n'\n""" + log + """'```""",
             "Admin Alert": """```diff\n- """ + log + """``` """,
             "Response": """```fix\n""" + log + """```""",
             "serverName :": """```yaml\n""" + log + """```""",
