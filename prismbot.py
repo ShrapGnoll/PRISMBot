@@ -44,8 +44,8 @@ class PrismClientProtocol(asyncio.Protocol):
                         "APIAdminResult": self._h_log_and_queue, "serverdetails": self._h_serverdetails,
                         "updateserverdetails": self._h_donothing}
         self.GAME_MANANGEMENT_CHAT = ["Game", "Admin Alert", "Response"]
-        self.GAME_MANANGEMENT_PARSERS = {"Game": self._h_man_game, "Admin Alert": self._h_man_adminalert,
-                                         "Response": self._h_man_response}
+        self.GAME_MANAGEMENT_PARSERS = {"Game": self._h_man_game, "Admin Alert": self._h_man_adminalert,
+                                        "Response": self._h_man_response}
         # net
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.host = ""
