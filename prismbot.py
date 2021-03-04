@@ -191,9 +191,20 @@ class PrismClientProtocol(asyncio.Protocol):
             return True
         return False
 
+    def cleanupNewlineMessages(self, message):
+        useless_indexes = []
+        string_ranges = ["-1", "0", "1", "2", "3", "4", "5", "6"]
+        for n, msg in enumerate(message.messages):
+            if ("\n" in msg) and (msg[n+1] in string_ranges) and (2147483647 > float(msg[n+2]) > 0):
+                useless_indexes += n+1
+                useless_indexes += n+2
+        for i in useless_indexes:
+            del message.messages[i]
+
     def _h_chat(self, message):
         if self.isGameManagementChat(message):
             del message.messages[:2]
+            self.cleanupNewlineMessages(message)
             self.GAME_MANAGEMENT_PARSERS[message.messages[0]](message)
         else:
             self._log(message)
