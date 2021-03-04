@@ -195,7 +195,7 @@ class PrismClientProtocol(asyncio.Protocol):
         useless_indexes = []
         string_ranges = ("-1", "0", "1", "2", "3", "4", "5", "6")
         for n, msg in enumerate(message.messages):
-            if "\n" in msg and msg.endswith(string_ranges) and (2147483647 > float(msg[n+1]) > 0):
+            if "\n" in msg and msg.endswith(string_ranges) and (2147483647 > float(message.messages[n+1]) > 0):
                 useless_indexes += n+1
                 useless_indexes += n+2
         for i in useless_indexes:
