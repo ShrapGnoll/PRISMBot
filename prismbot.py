@@ -204,7 +204,7 @@ class PrismClientProtocol(asyncio.Protocol):
         self._log(message, queue=True)
 
     def _h_man_adminalert(self, message):
-        if message.contains([" ]m"]) and self.TEAMKILL_CHANNEL:
+        if message.contains([" m]"]) and self.TEAMKILL_CHANNEL:
             self._log(message, queue=True, channel_id=self.TEAMKILL_CHANNEL)
             return
         if message.contains(self.config["SQUELCH_ADMIN"].values()):
