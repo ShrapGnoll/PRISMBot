@@ -207,7 +207,7 @@ class PrismClientProtocol(asyncio.Protocol):
             self.cleanupNewlineMessages(message)
             self.GAME_MANAGEMENT_PARSERS[message.messages[0]](message)
         else:
-            self._h_log(message)
+            self._log(message)
 
     def _h_man_game(self, message):
         if message.contains(self.config["SQUELCH_GAME"].values()):
