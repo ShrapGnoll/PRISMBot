@@ -12,7 +12,8 @@ class Logger:
 
     def consume_log(self):
         try:
-            return self.log_buffer.pop(0)
+            item = self.log_buffer.pop(0)
+            return item
         except IndexError:
             return
 

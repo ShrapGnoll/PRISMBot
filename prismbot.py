@@ -62,7 +62,7 @@ class PrismClientProtocol(asyncio.Protocol):
         # program state
         self.config = None
         self.authenticated = False
-        self.debug = False  # Toggle this to see detailed output
+        self.debug = True  # Toggle this to see detailed output
         self.logger = logger.Logger()
         self.periodic = [self.periodic_showafk]
         self.showafk = 1200
@@ -207,7 +207,7 @@ class PrismClientProtocol(asyncio.Protocol):
             self.cleanupNewlineMessages(message)
             self.GAME_MANAGEMENT_PARSERS[message.messages[0]](message)
         else:
-            self._log(message)
+            self._h_log(message)
 
     def _h_man_game(self, message):
         if message.contains(self.config["SQUELCH_GAME"].values()):

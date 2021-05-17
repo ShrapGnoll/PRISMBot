@@ -16,7 +16,6 @@ async def main():
     transport, protocol = await loop.create_connection(lambda: prismbot.PrismClientProtocol(on_con_lost, config),
                                                        config["PRISM"]["HOST"], config["PRISM"]["PORT"])
     dbot.assign_bot(protocol)  # assign PRISM bot to Discord Bot
-    protocol.set_logger(dbot.logger)
     # Periodic (Timer) Functions
     wait_on = []
     wait_on.append(on_con_lost)
@@ -26,6 +25,7 @@ async def main():
         wait_on.append(task)
     protocol.login(protocol.username, protocol.password)  # log into PRISM
     wait_on.append(dbot.start(config["DISCORD"]["TOKEN"]))
+    protocol.set_logger(dbot.logger)
     try:
         await asyncio.wait(wait_on, return_when=asyncio.FIRST_EXCEPTION)
     except prismbot.PrismClientProtocolConnectionLost:
@@ -37,9 +37,6 @@ async def main():
     except SystemExit:
         dbot.logger.log("PRISMBot caught SystemExit.")
         return False
-    finally:
-        transport.close()
-        await dbot.close()
 
 if __name__ == "__main__":
     try:
