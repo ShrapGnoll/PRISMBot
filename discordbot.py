@@ -10,6 +10,10 @@ import logger
 import random
 
 class DiscordBot(discord.Client):
+    # All default maps - Generate using PRBuild -> Tools -> Generate Maplist
+
+    MAPLISTALL = []  # PENDING RELEASE
+
     def __init__(self, config=None):
         super().__init__()
         self.COMMAND_CHANNEL = None  # channels the bot will accept commands in
@@ -28,6 +32,28 @@ class DiscordBot(discord.Client):
                 self.add_admin(admin)
             self.config = config
 
+    def construct_maplist(self, mode):
+        layer_weights = {
+            "std": 4,
+            "alt": 4,
+            "lrg": 3,
+            "inf": 2 }
+        maplist = []
+        for each in self.MAPLISTALL:
+            if each[1] != mode:
+                continue
+            if each in [m[0] for m in maplist]:
+                continue
+            map_firstname = each[0].split("_")[0]
+            if map_firstname in self.prism_bot.last_maps:
+                continue
+            maplist.append((each, layer_weights[each[2].lower()]))
+        return [choice[0][0] + "_" + choice[0][2] for choice in random.choices(maplist, [each[1] for each in maplist], k=3)]
+
+    async def automvote(self, mode):
+        maps = self.construct_maplist(mode)
+        await self.prism_bot._raw_send_command("say", "!history")  # gets history into prismbot.last_maps
+        await self.prism_bot._raw_send_command("mapvote", *maps)
 
     async def on_ready(self):
         await self.log_to_command_channel("PRISMBot Online.")
@@ -61,6 +87,10 @@ class DiscordBot(discord.Client):
                 self.prism_bot.login(self.prism_bot.username, self.prism_bot.password)
             if message.content[1:].lower() == "serverdetails":
                 self.prism_bot.get_server_details()
+            if message.content[1:].lower() == "autovote aas":
+                await self.automvote("gpm_cq")
+            if message.content[1:].lower() == "autovote ins":
+                await self.automvote("gpm_insurgency")
 
     async def log_to_command_channel(self, msg):
         channel = self.get_channel(self.COMMAND_CHANNEL)

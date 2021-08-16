@@ -68,6 +68,7 @@ class PrismClientProtocol(asyncio.Protocol):
         self.showafk = 1200
         self.COMMAND_CHANNEL = None
         self.TEAMKILL_CHANNEL = None
+        self.last_maps = []
         if config:
             self.host = config["PRISM"]["HOST"]
             self.port = config["PRISM"]["PORT"]
@@ -204,17 +205,18 @@ class PrismClientProtocol(asyncio.Protocol):
     def _h_chat(self, message):
         if self.isGameManagementChat(message):
             del message.messages[:2]
-            self.cleanupNewlineMessages(message)
             self.GAME_MANAGEMENT_PARSERS[message.messages[0]](message)
         else:
             self._log(message)
 
     def _h_man_game(self, message):
+        self.cleanupNewlineMessages(message)
         if message.contains(self.config["SQUELCH_GAME"].values()):
             return
         self._log(message, queue=True)
 
     def _h_man_adminalert(self, message):
+        self.cleanupNewlineMessages(message)
         if message.contains([" m]"]) and self.TEAMKILL_CHANNEL:
             self._log(message, queue=True, channel_id=self.TEAMKILL_CHANNEL)
             return
@@ -223,6 +225,12 @@ class PrismClientProtocol(asyncio.Protocol):
         self._log(message, queue=True)
 
     def _h_man_response(self, message):
+        if len(message.messages) >= 3 and "5th last map" in message.messages[2]:
+            last_5_maps = []
+            for msg in message.messages:
+                if "last map" in msg or "Previous map" in msg:
+                    last_5_maps.append(msg.split(":")[1:][0].split(" ")[1].lower())
+            self.last_maps = last_5_maps
         self._log(message, queue=True)
 
     def _h_log_and_queue(self, message):
