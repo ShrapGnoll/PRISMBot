@@ -10,11 +10,13 @@ This program needs python 3.7+
 
 One external python package is required.
 
-discord.py https://pypi.org/project/discord.py/
+py-cord https://pypi.org/project/py-cord/
 
 You can easily get it through pip.
 
-`python3 -m pip install -U discord.py`
+`python3 -m pip install -U py-cord`
+
+Note: this used to use discord.py until it went unmaintained, it now uses py-cord fork 
 
 #### Setting up Discord
 
