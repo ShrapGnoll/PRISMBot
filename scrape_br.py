@@ -13,8 +13,10 @@ maps = {'vadso', 'kozelsk', 'kokan', 'route', 'mestia', 'grozny', 'brecourt',
         'khami', 'sbeneh', 'hades', 'bobcat', 'falcon', 'uly',
         'ghost', 'marl', 'soul', 'thund', 'dragon'}
 map_counts = {}
+map_vote_counts = {}
 for m in maps:
     map_counts[m] = 0
+    map_vote_counts = 0
 with open(path, "r") as logs:
     l = []
     mapvote_winners = []
@@ -48,4 +50,5 @@ with open(path, "r") as logs:
             if m in name:
                 map_counts[m] += count
     sorted_map_count = {k: v for k, v in sorted(map_counts.items(), key=lambda i: i[1], reverse=True)}
-    print(sorted_map_count)
+    #print(sorted_map_count)
+    print(map_vote_counts)

@@ -12,7 +12,7 @@ import random
 class DiscordBot(discord.Client):
     # All default maps - Generate using PRBuild -> Tools -> Generate Maplist
 
-    MAPLISTALL = []  # PENDING RELEASE
+    MAPLISTALL = []  # pending release
 
     def __init__(self, config=None):
         super().__init__()
@@ -38,17 +38,17 @@ class DiscordBot(discord.Client):
             "alt": 4,
             "lrg": 3,
             "inf": 2 }
-        maplist = []
+        maplist = set()
         for each in self.MAPLISTALL:
             if each[1] != mode:
                 continue
-            if each in [m[0] for m in maplist]:
+            if each[0] in maplist:
                 continue
             map_firstname = each[0].split("_")[0]
             if map_firstname in self.prism_bot.last_maps:
                 continue
-            maplist.append((each, layer_weights[each[2].lower()]))
-        return [choice[0][0] + "_" + choice[0][2] for choice in random.choices(maplist, [each[1] for each in maplist], k=3)]
+            maplist.add((each, layer_weights[each[2].lower()]))
+        return [choice[0][0] for choice in random.sample(maplist, [each[1] for each in maplist], k=3)]
 
     async def automvote(self, mode):
         maps = self.construct_maplist(mode)
