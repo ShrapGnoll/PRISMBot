@@ -199,22 +199,35 @@ class PrismClientProtocol(asyncio.Protocol):
                 message.messages[n] = message.messages[n][:-1]
                 useless_indexes.append(n+1)
         for i in useless_indexes:
-            del message.messages[i]
+            try:
+                del message.messages[i]
+            except IndexError:
+                pass
+
 
     def _h_chat(self, message):
         if self.isGameManagementChat(message):
             del message.messages[:2]
-            self.cleanupNewlineMessages(message)
             self.GAME_MANAGEMENT_PARSERS[message.messages[0]](message)
         else:
-            self._h_log(message)
+            self._log(message)
+        for msg in message.additional_messages:
+            if self.isGameManagementChat(msg):
+                del msg.messages[:2]
+                try:
+                    self.GAME_MANAGEMENT_PARSERS[msg.messages[0]](msg)
+                except KeyError:
+                    pass
+
 
     def _h_man_game(self, message):
+        #self.cleanupNewlineMessages(message) # old
         if message.contains(self.config["SQUELCH_GAME"].values()):
             return
         self._log(message, queue=True)
 
     def _h_man_adminalert(self, message):
+        #self.cleanupNewlineMessages(message)
         if message.contains([" m]"]) and self.TEAMKILL_CHANNEL:
             self._log(message, queue=True, channel_id=self.TEAMKILL_CHANNEL)
             return
@@ -223,6 +236,15 @@ class PrismClientProtocol(asyncio.Protocol):
         self._log(message, queue=True)
 
     def _h_man_response(self, message):
+        if message.contains(self.config["SQUELCH_RESPONSE"].values()):
+            return
+        if len(message.messages) >= 3 and "5th last map" in message.messages[2]:
+            last_5_maps = []
+            for msg in message.messages:
+                if "last map" in msg or "Previous map" in msg:
+                    last_5_maps.append(msg.split(":")[1:][0].split(" ")[1].lower())
+            self.last_maps = last_5_maps
+            #print(str(self.last_maps))
         self._log(message, queue=True)
 
     def _h_log_and_queue(self, message):
@@ -309,8 +331,16 @@ class Message:
     """
     def __init__(self, data):
         self.data = data  # raw packet data
-        self.subject = data.split("\2")[0].lstrip("\1")
-        self.messages = data.split("\2")[1:][0].split("\3")
+        self.additional_messages = []
+        if any(["\n" + str(n) in self.data for n in range(-1,7)]):
+            spl = data.split("\n")
+            for dta in spl[1:]:
+                #msg = "\1chat" + "\2" + "5\3" + msg
+                dta = "\1chat" + "\2" + dta
+                self.additional_messages.append(Message(dta))
+            self.data = spl[0]
+        self.subject = self.data.split("\2")[0].lstrip("\1")
+        self.messages = self.data.split("\2")[1:][0].split("\3")
         self.messages[-1] = self.messages[-1].rstrip("\4\0")  # strip trailing delimiter
 
     def contains(self, list_of_strs):
