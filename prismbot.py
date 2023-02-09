@@ -211,6 +211,7 @@ class PrismClientProtocol(asyncio.Protocol):
             self.GAME_MANAGEMENT_PARSERS[message.messages[0]](message)
         else:
             self._log(message)
+<<<<<<< HEAD
         for msg in message.additional_messages:
             if self.isGameManagementChat(msg):
                 del msg.messages[:2]
@@ -219,6 +220,8 @@ class PrismClientProtocol(asyncio.Protocol):
                 except KeyError:
                     pass
 
+=======
+>>>>>>> fa7d6d1dcebe340d737fa1ff8a2d793a4884da34
 
     def _h_man_game(self, message):
         #self.cleanupNewlineMessages(message) # old
