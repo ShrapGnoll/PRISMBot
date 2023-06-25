@@ -30,7 +30,7 @@ class DiscordBot(discord.Client):
             self.COMMAND_CHANNEL = int(config["DISCORD_CHANNELS"]["COMMAND"])
             self.TEAMKILL_CHANNEL = int(config["DISCORD_CHANNELS"]["TEAMKILL"])
             for admin in config["DISCORD_ADMINS"]:
-                self.add_admin(admin)
+                self.add_admin(config["DISCORD_ADMINS"][admin])
             self.config = config
 
     def construct_maplist(self, mode):
@@ -144,8 +144,10 @@ class DiscordBot(discord.Client):
             await self.log_to_command_channel("Status: Disconnected!")
 
     def add_admin(self, user_id):
-        assert (isinstance(user_id, int) or isinstance(user_id, float))
-        self.ADMINS.append(int(user_id))
+        if user_id.isnumeric():
+            self.ADMINS.append(int(user_id))
+        else :
+            raise Exception(f"admin id contains charectars : {user_id} ")
 
     def assign_bot(self, bot):
         assert isinstance(bot, prismbot.PrismClientProtocol)
