@@ -15,7 +15,8 @@ class DiscordBot(discord.Client):
     MAPLISTALL = []  # pending release
 
     def __init__(self, config=None):
-        super().__init__()
+        intents = discord.Intents.all()
+        super().__init__(intents=intents)
         self.COMMAND_CHANNEL = None  # channels the bot will accept commands in
         self.TEAMKILL_CHANNEL = None  # channels the bot will print tks in
         self.OWNER_ID = None  # the owner of the bot, used for informational @mentions
