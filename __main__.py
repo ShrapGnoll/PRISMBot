@@ -24,7 +24,7 @@ async def main():
         loop.call_later(2 ** 128, task.cancel)
         wait_on.append(task)
     protocol.login(protocol.username, protocol.password)  # log into PRISM
-    wait_on.append(dbot.start(config["DISCORD"]["TOKEN"]))
+    wait_on.append(await dbot.start(config["DISCORD"]["TOKEN"]))
     protocol.set_logger(dbot.logger)
     try:
         await asyncio.wait(wait_on, return_when=asyncio.FIRST_EXCEPTION)
