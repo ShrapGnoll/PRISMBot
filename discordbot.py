@@ -117,17 +117,15 @@ class DiscordBot(discord.Client):
      while not self.is_ready():    # wait until clinet is ready to 
         await asyncio.sleep(0.5)
         
-        while True:
-            await asyncio.sleep(0.5)
-            while self.logger.log_buffer:
-                data = self.logger.consume_log()
-                if not data[0]:
-                    return
-                if data[1] is not None:
-                    channel = self.get_channel(data[1])
-                    await channel.send(self.log_formatter(data[0]))
-                else:
-                    await self.log_to_command_channel(self.log_formatter(data[0]))
+     while True:
+        await asyncio.sleep(0.5)
+        while len(self.logger.log_buffer) != 0:
+            data = self.logger.consume_log()
+            if data[1] is not None:
+                channel = self.get_channel(data[1])
+                await channel.send(str(data[0]))
+            else:
+                await self.log_to_command_channel(self.log_formatter(data[0]))
 
     async def status_reconnect(self):
         while True:
