@@ -114,6 +114,9 @@ class DiscordBot(discord.Client):
         return log
 
     async def log_to_discord(self):
+     while not self.is_ready():    # wait until clinet is ready to 
+        await asyncio.sleep(0.5)
+        
         while True:
             await asyncio.sleep(0.5)
             while self.logger.log_buffer:
