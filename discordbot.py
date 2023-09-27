@@ -15,7 +15,8 @@ class DiscordBot(discord.Client):
     MAPLISTALL = []  # pending release
 
     def __init__(self, config=None):
-        super().__init__()
+        intents = discord.Intents.all()
+        super().__init__(intents=intents)
         self.COMMAND_CHANNEL = None  # channels the bot will accept commands in
         self.TEAMKILL_CHANNEL = None  # channels the bot will print tks in
         self.OWNER_ID = None  # the owner of the bot, used for informational @mentions
@@ -29,7 +30,7 @@ class DiscordBot(discord.Client):
             self.COMMAND_CHANNEL = int(config["DISCORD_CHANNELS"]["COMMAND"])
             self.TEAMKILL_CHANNEL = int(config["DISCORD_CHANNELS"]["TEAMKILL"])
             for admin in config["DISCORD_ADMINS"]:
-                self.add_admin(admin)
+                self.add_admin(config["DISCORD_ADMINS"][admin])
             self.config = config
 
     def construct_maplist(self, mode):
@@ -113,17 +114,18 @@ class DiscordBot(discord.Client):
         return log
 
     async def log_to_discord(self):
-        while True:
-            await asyncio.sleep(0.5)
-            while self.logger.log_buffer:
-                data = self.logger.consume_log()
-                if not data[0]:
-                    return
-                if data[1] is not None:
-                    channel = self.get_channel(data[1])
-                    await channel.send(self.log_formatter(data[0]))
-                else:
-                    await self.log_to_command_channel(self.log_formatter(data[0]))
+     while not self.is_ready():    # wait until clinet is ready to 
+        await asyncio.sleep(0.5)
+        
+     while True:
+        await asyncio.sleep(0.5)
+        while len(self.logger.log_buffer) != 0:
+            data = self.logger.consume_log()
+            if data[1] is not None:
+                channel = self.get_channel(data[1])
+                await channel.send(str(data[0]))
+            else:
+                await self.log_to_command_channel(self.log_formatter(data[0]))
 
     async def status_reconnect(self):
         while True:
@@ -143,8 +145,10 @@ class DiscordBot(discord.Client):
             await self.log_to_command_channel("Status: Disconnected!")
 
     def add_admin(self, user_id):
-        assert (isinstance(user_id, int) or isinstance(user_id, float))
-        self.ADMINS.append(int(user_id))
+        if user_id.isnumeric():
+            self.ADMINS.append(int(user_id))
+        else :
+            raise Exception(f"admin id contains charectars : {user_id} ")
 
     def assign_bot(self, bot):
         assert isinstance(bot, prismbot.PrismClientProtocol)
