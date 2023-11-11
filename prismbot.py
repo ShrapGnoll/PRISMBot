@@ -200,7 +200,10 @@ class PrismClientProtocol(asyncio.Protocol):
                 message.messages[n] = message.messages[n][:-1]
                 useless_indexes.append(n+1)
         for i in useless_indexes:
-            del message.messages[i]
+            try:
+                del message.messages[i]
+            except IndexError:
+                pass
 
     def _h_chat(self, message):
         if self.isGameManagementChat(message):
